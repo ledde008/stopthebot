@@ -8,6 +8,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
+from sklearn.ensemble import GradientBoostingClassifier
 
 # columns
 categorical_columns = ["Proto","SrcAddr","Sport","DstAddr","Dport","State"]
@@ -41,16 +42,20 @@ preprocessor = ColumnTransformer(
         ('num', numeric_transformer, numerical_columns),
         ('cat', categorical_transformer, categorical_columns)])
 
-# Pipeline with a SVM classifier
-clf = Pipeline(steps=[('preprocessor', preprocessor), ('classifier', SVC(gamma="auto"))])
+# Classfiers
+clf_svm = Pipeline(steps=[('preprocessor', preprocessor), ('classifier', SVC(gamma="auto"))])
+clf_gbt = Pipeline(steps=[('preprocessor', preprocessor), ('classifier', GradientBoostingClassifier(max_depth=3))])
+
 
 # Spliting data for training and testing
-print("Training the SVM Model")
 X = dataframe.drop("Label", axis=1)
 y = dataframe["Label"]
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
-clf.fit(X_train, y_train)
+clf_svm.fit(X_train, y_train)
+clf_gbt.fit(X_train, y_train)
 
-# print the score
+# print the scores
 print("Testing the SVM Model")
-print("SVM Model score: %.3f" % clf.score(X_test, y_test))
+print("SVM Model score: %.3f" % clf_svm.score(X_test, y_test))
+print("Testing the GBT Model")
+print("GBT Model score: %.3f" % clf_gbt.score(X_test, y_test))
